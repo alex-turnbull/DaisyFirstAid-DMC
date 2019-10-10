@@ -9,6 +9,8 @@ public class UIControl : MonoBehaviour
     public Text colourThing;
     GraphicRaycaster raycaster;
 
+    public GameObject menu;
+
     void Awake()
     {
         // Get both of the components we need to do this
@@ -32,9 +34,32 @@ public class UIControl : MonoBehaviour
                 //For every result returned, output the name of the GameObject on the Canvas hit by the Ray
                 foreach (RaycastResult result in results)
                 {
+                    if(result.gameObject.name == "MenuButton")
+                    {
+                        StartCoroutine("menuTransition");
+                    }
                     colourThing.text = $"HIT: {result.gameObject.name}";
                 }
             }
         }
+    }
+
+    IEnumerator menuTransition()
+    {
+        float elapsedTime = 0;
+        float waitTime = 3f;
+        RectTransform menuTrans = menu.GetComponent<RectTransform>();
+
+        while (menuTrans.anchoredPosition.x != 0)
+        {
+            menuTrans.anchoredPosition = Vector3.Lerp(menuTrans.anchoredPosition, new Vector3(0,210,0), (elapsedTime / waitTime));
+            elapsedTime += Time.deltaTime;
+
+            // Yield here
+            yield return null;
+        }
+        // Make sure we got there
+        menuTrans.anchoredPosition = new Vector3(0, 210, 0);
+        yield return null;
     }
 }
