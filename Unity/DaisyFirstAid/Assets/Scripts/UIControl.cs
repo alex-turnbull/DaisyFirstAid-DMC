@@ -13,6 +13,8 @@ public class UIControl : MonoBehaviour
 
     public GameObject menu;
 
+    private IEnumerator coroutine;
+
     void Awake()
     {
         // Get both of the components we need to do this
@@ -39,16 +41,34 @@ public class UIControl : MonoBehaviour
                 {
                     if(result.gameObject.name == "MenuButton")
                     {
-                        StartCoroutine("openMenu");
+                        StopAllCoroutines();
+                        coroutine = openMenu();
+                        StartCoroutine(coroutine);
                     }
 
                     if(result.gameObject.name == "Return")
                     {
-                        StartCoroutine("closeMenu");
+                        StopAllCoroutines();
+                        coroutine = closeMenu();
+                        StartCoroutine(coroutine);
                     }
                     colourThing.text = $"HIT: {result.gameObject.name}";
                 }
             }
+        }
+
+        if (Input.GetKeyDown("o"))
+        {
+            StopAllCoroutines();
+            coroutine = openMenu();
+            StartCoroutine(coroutine);
+        }
+
+        if (Input.GetKeyDown("p"))
+        {
+            StopAllCoroutines();
+            coroutine = closeMenu();
+            StartCoroutine(coroutine);
         }
     }
 
@@ -58,7 +78,7 @@ public class UIControl : MonoBehaviour
         float waitTime = 3f;
         RectTransform menuTrans = menu.GetComponent<RectTransform>();
 
-        while (menuTrans.anchoredPosition.x != 0)
+        while (Vector3.Distance(menuTrans.anchoredPosition, new Vector3(0,210,0)) > 0.2)
         {
             menuTrans.anchoredPosition = Vector3.Lerp(menuTrans.anchoredPosition, new Vector3(0,210,0), (elapsedTime / waitTime));
             elapsedTime += Time.deltaTime;
@@ -77,7 +97,7 @@ public class UIControl : MonoBehaviour
         float waitTime = 3f;
         RectTransform menuTrans = menu.GetComponent<RectTransform>();
 
-        while (menuTrans.anchoredPosition.x != -540)
+        while (Vector3.Distance(menuTrans.anchoredPosition, new Vector3(-540, 210, 0)) > 0.2)
         {
             menuTrans.anchoredPosition = Vector3.Lerp(menuTrans.anchoredPosition, new Vector3(-540, 210, 0), (elapsedTime / waitTime));
             elapsedTime += Time.deltaTime;
