@@ -6,20 +6,37 @@ using UnityEngine.EventSystems;
 
 public class UIControl : MonoBehaviour
 {
+    public GameObject pagesHolder;
+    [SerializeField]
+    private List<GameObject> pages = new List<GameObject>();
+    private int currentPageIndex = 0;
+    private int previousPageIndex = 0;
+
     public Text colourThing;
     GraphicRaycaster raycaster;
 
     private Vector3 initMenuPos;
 
     public GameObject menu;
+    public GameObject menuBack;
 
     private IEnumerator coroutine;
+    private bool menuOpen = false;
 
     void Awake()
     {
         // Get both of the components we need to do this
         raycaster = GetComponent<GraphicRaycaster>();
         initMenuPos = menu.GetComponent<RectTransform>().anchoredPosition;
+    }
+
+    private void Start()
+    {
+        for (int i = 0; i < pagesHolder.transform.childCount; i++)
+        {
+            pages.Add(pagesHolder.transform.GetChild(i).gameObject);
+            pagesHolder.transform.GetChild(i).gameObject.GetComponent<pageRef>().pageIndex = i;
+        }
     }
 
     void Update()
@@ -46,12 +63,26 @@ public class UIControl : MonoBehaviour
                         StartCoroutine(coroutine);
                     }
 
-                    if(result.gameObject.name == "Return")
+                    if(result.gameObject.name == "Return" || results[0].gameObject.name == "menuBack")
                     {
                         StopAllCoroutines();
                         coroutine = closeMenu();
                         StartCoroutine(coroutine);
                     }
+
+                    if(result.gameObject.name == "ReturnButton")
+                    {
+                        previousPage();
+                    }
+
+                    if(result.gameObject.tag == "PageButton")
+                    {
+                        if(result.gameObject.GetComponent<pageToOpen>() != null)
+                        {
+                            changePage(result.gameObject.GetComponent<pageToOpen>().pageRef.pageIndex);
+                        }                        
+                    }
+
                     colourThing.text = $"HIT: {result.gameObject.name}";
                 }
             }
@@ -74,6 +105,8 @@ public class UIControl : MonoBehaviour
 
     IEnumerator openMenu()
     {
+        menuOpen = true;
+        menuBack.SetActive(true);
         float elapsedTime = 0;
         float waitTime = 3f;
         RectTransform menuTrans = menu.GetComponent<RectTransform>();
@@ -93,6 +126,8 @@ public class UIControl : MonoBehaviour
 
     IEnumerator closeMenu()
     {
+        menuOpen = false;
+        menuBack.SetActive(false);
         float elapsedTime = 0;
         float waitTime = 3f;
         RectTransform menuTrans = menu.GetComponent<RectTransform>();
@@ -108,5 +143,19 @@ public class UIControl : MonoBehaviour
         // Make sure we got there
         menuTrans.anchoredPosition = new Vector3(-540, 210, 0);
         yield return null;
+    }
+
+    void changePage(int pageIndex)
+    {
+        previousPageIndex = currentPageIndex;
+        currentPageIndex = pageIndex;
+
+        pagesHolder.transform.GetChild(previousPageIndex).gameObject.SetActive(false);
+        pagesHolder.transform.GetChild(currentPageIndex).gameObject.SetActive(true);
+    }
+
+    void previousPage()
+    {
+        changePage(previousPageIndex);
     }
 }
