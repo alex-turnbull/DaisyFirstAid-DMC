@@ -9,8 +9,10 @@ public class UIControl : MonoBehaviour
     public GameObject pagesHolder;
     [SerializeField]
     private List<GameObject> pages = new List<GameObject>();
+    public List<GameObject> pageHistory = new List<GameObject>();
     private int currentPageIndex = 0;
     private int previousPageIndex = 0;
+    public GameObject currentPage;
 
     public Text colourThing;
     GraphicRaycaster raycaster;
@@ -23,9 +25,10 @@ public class UIControl : MonoBehaviour
     private IEnumerator coroutine;
     private bool menuOpen = false;
 
+    private bool moving = false;
+
     void Awake()
     {
-        // Get both of the components we need to do this
         raycaster = GetComponent<GraphicRaycaster>();
         initMenuPos = menu.GetComponent<RectTransform>().anchoredPosition;
     }
@@ -43,7 +46,7 @@ public class UIControl : MonoBehaviour
     {
         foreach (Touch touch in Input.touches)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0) || touch.phase == TouchPhase.Began)
+            if (Input.GetKeyDown(KeyCode.Mouse0) || touch.phase == TouchPhase.Ended)
             {
                 //Set up the new Pointer Event
                 PointerEventData pointerData = new PointerEventData(EventSystem.current);
@@ -53,53 +56,89 @@ public class UIControl : MonoBehaviour
                 pointerData.position = Input.GetTouch(0).position;
                 raycaster.Raycast(pointerData, results);
 
+                moving = pointerData.IsScrolling();
+                //if (good = true) work; 
+
+
                 //For every result returned, output the name of the GameObject on the Canvas hit by the Ray
                 foreach (RaycastResult result in results)
                 {
-                    if(result.gameObject.name == "MenuButton")
+                    if (result.gameObject.name == "MenuButton")
                     {
                         StopAllCoroutines();
                         coroutine = openMenu();
                         StartCoroutine(coroutine);
                     }
 
-                    if(result.gameObject.name == "Return" || results[0].gameObject.name == "menuBack")
+                    if (result.gameObject.name == "Return" || results[0].gameObject.name == "menuBack")
                     {
                         StopAllCoroutines();
                         coroutine = closeMenu();
                         StartCoroutine(coroutine);
                     }
 
-                    if(result.gameObject.name == "ReturnButton")
+                    if (result.gameObject.name == "ReturnButton")
                     {
                         previousPage();
                     }
 
-                    if(result.gameObject.tag == "PageButton")
-                    {
-                        if(result.gameObject.GetComponent<pageToOpen>() != null)
-                        {
-                            changePage(result.gameObject.GetComponent<pageToOpen>().pageRef.pageIndex);
-                        }                        
-                    }
+                    //if (result.gameObject.tag == "PageButton")
+                    //{
+                    //    if (result.gameObject.GetComponent<pageToOpen>() != null)
+                    //    {
+                   //         changePage(result.gameObject.GetComponent<pageToOpen>().pageRef);
+                    //    }
+                    //}
 
                     colourThing.text = $"HIT: {result.gameObject.name}";
-                }
+                }              
             }
         }
 
+
+        //--------------------------------DEBUGGING UNITY--------------------------------
         if (Input.GetKeyDown("o"))
         {
             StopAllCoroutines();
             coroutine = openMenu();
             StartCoroutine(coroutine);
         }
-
         if (Input.GetKeyDown("p"))
         {
             StopAllCoroutines();
             coroutine = closeMenu();
             StartCoroutine(coroutine);
+        }        
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            changePage(pagesHolder.transform.GetChild(1).gameObject);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            changePage(pagesHolder.transform.GetChild(2).gameObject);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            changePage(pagesHolder.transform.GetChild(3).gameObject);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            changePage(pagesHolder.transform.GetChild(4).gameObject);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            changePage(pagesHolder.transform.GetChild(5).gameObject);
+        }
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            previousPage();
+        }
+        //--------------------------------------------------------------------------------
+
+        //ANDROID BACK BUTTON
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            previousPage();
         }
     }
 
@@ -145,17 +184,33 @@ public class UIControl : MonoBehaviour
         yield return null;
     }
 
-    void changePage(int pageIndex)
+    public void changePage(GameObject pageObject)
     {
-        previousPageIndex = currentPageIndex;
-        currentPageIndex = pageIndex;
+        if (!moving)
+        {
+            pageHistory.Add(currentPage);
+            currentPage.SetActive(false);
+            currentPage = pageObject;
+            currentPage.SetActive(true);
+        }
+        
 
-        pagesHolder.transform.GetChild(previousPageIndex).gameObject.SetActive(false);
-        pagesHolder.transform.GetChild(currentPageIndex).gameObject.SetActive(true);
+
+        //previousPageIndex = currentPageIndex;
+        //currentPageIndex = pageIndex;
+
+        //pagesHolder.transform.GetChild(previousPageIndex).gameObject.SetActive(false);
+        //pagesHolder.transform.GetChild(currentPageIndex).gameObject.SetActive(true);
     }
 
-    void previousPage()
+    public void previousPage()
     {
-        changePage(previousPageIndex);
+        if(pageHistory.Count != 0)
+        {
+            currentPage.SetActive(false);
+            currentPage = pageHistory[pageHistory.Count - 1];
+            pageHistory.RemoveAt(pageHistory.Count - 1);
+            currentPage.SetActive(true);
+        }        
     }
 }

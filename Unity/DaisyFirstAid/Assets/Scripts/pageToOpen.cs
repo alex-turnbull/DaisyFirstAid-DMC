@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class pageToOpen : MonoBehaviour
 {
-    public pageRef pageRef;
+    public GameObject pageRef;
 }
