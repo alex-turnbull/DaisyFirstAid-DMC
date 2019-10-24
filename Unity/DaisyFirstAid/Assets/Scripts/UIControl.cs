@@ -63,24 +63,24 @@ public class UIControl : MonoBehaviour
                 //For every result returned, output the name of the GameObject on the Canvas hit by the Ray
                 foreach (RaycastResult result in results)
                 {
-                    if (result.gameObject.name == "MenuButton")
-                    {
-                        StopAllCoroutines();
-                        coroutine = openMenu();
-                        StartCoroutine(coroutine);
-                    }
+                    //if (result.gameObject.name == "MenuButton")
+                    //{
+                    //    StopAllCoroutines();
+                    //    coroutine = openMenu();
+                    //    StartCoroutine(coroutine);
+                    //}
 
-                    if (result.gameObject.name == "Return" || results[0].gameObject.name == "menuBack")
-                    {
-                        StopAllCoroutines();
-                        coroutine = closeMenu();
-                        StartCoroutine(coroutine);
-                    }
+                    //if (result.gameObject.name == "Return" || results[0].gameObject.name == "menuBack")
+                    //{
+                    //    StopAllCoroutines();
+                    //    coroutine = closeMenu();
+                    //    StartCoroutine(coroutine);
+                    //}
 
-                    if (result.gameObject.name == "ReturnButton")
-                    {
-                        previousPage();
-                    }
+                    //if (result.gameObject.name == "ReturnButton")
+                    //{
+                    //    previousPage();
+                    //}
 
                     //if (result.gameObject.tag == "PageButton")
                     //{
@@ -212,5 +212,19 @@ public class UIControl : MonoBehaviour
             pageHistory.RemoveAt(pageHistory.Count - 1);
             currentPage.SetActive(true);
         }        
+    }
+
+    public void btn_openMenu()
+    {
+        StopAllCoroutines();
+        coroutine = openMenu();
+        StartCoroutine(coroutine);
+    }
+
+    public void btn_closeMenu()
+    {
+        StopAllCoroutines();
+        coroutine = closeMenu();
+        StartCoroutine(coroutine);
     }
 }
